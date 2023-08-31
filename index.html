@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Webhook Deleter 9000</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  .container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+  }
+
+  textarea {
+    width: 100%;
+    height: 100px;
+    resize: none;
+  }
+
+  .btn {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    margin: 5px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+  }
+
+  .btn:hover {
+    background-color: #258cd1;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>Webhook Deleter 9000</h1>
+    <textarea id="urlInput" placeholder="Enter URL"></textarea>
+    <button id="deleteButton" class="btn">Delete</button>
+    <button id="bulkModeButton" class="btn">Bulk Mode</button>
+    <button id="darkModeButton" class="btn">Dark Mode</button>
+    <div id="loader" class="loader" style="display: none;"></div>
+    <div id="statusMessage" style="display: none;"></div>
+  </div>
+
+  <script>
+    const deleteButton = document.getElementById('deleteButton');
+    const bulkModeButton = document.getElementById('bulkModeButton');
+    const darkModeButton = document.getElementById('darkModeButton');
+    const urlInput = document.getElementById('urlInput');
+    const loader = document.getElementById('loader');
+    const statusMessage = document.getElementById('statusMessage');
+
+    let bulkMode = false;
+    urlInput.rows = bulkMode ? 5 : 1;
+
+    urlInput.addEventListener('keydown', (event) => {
+      if (!bulkMode && event.key === 'Enter') {
+        event.preventDefault();
+        deleteUrls([urlInput.value.trim()]);
+      }
+    });
+
+    deleteButton.addEventListener('click', async () => {
+      const urls = urlInput.value.trim().split('\n').map(url => url.trim());
+      if (urls.length > 0) {
+        loader.style.display = 'inline-block';
+        statusMessage.style.display = 'none';
+        await deleteUrls(urls);
+        loader.style.display = 'none';
+      }
+    });
+
+    bulkModeButton.addEventListener('click', () => {
+      bulkMode = !bulkMode;
+      urlInput.classList.toggle('multiline', bulkMode);
+      urlInput.rows = bulkMode ? 5 : 1;
+      urlInput.value = '';
+      urlInput.placeholder = bulkMode ? 'Enter URLs (one per line)' : 'Enter URL';
+	  bulkModeButton.innerHTML = bulkMode ? 'Single Mode' : 'Bulk Mode';
+    });
+
+    darkModeButton.addEventListener('click', () => {
+      const isDarkMode = document.body.style.backgroundColor === 'rgb(18, 18, 18)';
+      if (isDarkMode) {
+        document.body.style.backgroundColor = '#f2f2f2';
+        document.body.style.color = '#333';
+        document.querySelector('.container').style.backgroundColor = 'white';
+		darkModeButton.innerHTML = "Dark Mode";
+      } else {
+        document.body.style.backgroundColor = '#121212';
+        document.body.style.color = '#ffffff';
+        document.querySelector('.container').style.backgroundColor = '#333';
+		darkModeButton.innerHTML = "Light Mode";
+      }
+    });
+
+    async function deleteUrls(urls) {
+      for (const url of urls) {
+        if (url) {
+          await deleteUrl(url, urls);
+        }
+      }
+    }
+
+    async function deleteUrl(url, urls) {
+      try {
+        const response = await fetch(url, { method: 'DELETE' });
+        if (response.ok) {
+          if (bulkMode) {
+            statusMessage.textContent = `Successfully deleted ${urls.length} webhooks`;
+          } else {
+            statusMessage.textContent = 'Successfully deleted webhook';
+          }
+          statusMessage.style.color = 'green';
+        } else {
+          statusMessage.textContent = `Error ${response.status}`;
+          statusMessage.style.color = 'red';
+        }
+      } catch (error) {
+        console.error(`Error deleting ${url}: ${error}`);
+        statusMessage.textContent = `Error: ${error}`;
+        statusMessage.style.color = 'red';
+      } finally {
+        statusMessage.style.display = 'block';
+        setTimeout(() => {
+          statusMessage.style.display = 'none';
+          statusMessage.textContent = '';
+        }, 3000);
+      }
+    }
+  </script>
+</body>
+</html>
