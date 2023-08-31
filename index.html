@@ -51,7 +51,7 @@
     <textarea id="urlInput" placeholder="Enter URL"></textarea>
     <button id="deleteButton" class="btn">Delete</button>
     <button id="bulkModeButton" class="btn">Bulk Mode</button>
-    <button id="darkModeButton" class="btn">Dark Mode</button>
+    <button id="darkModeButton" class="btn">Light Mode</button>
     <div id="loader" class="loader" style="display: none;"></div>
     <div id="statusMessage" style="display: none;"></div>
   </div>
@@ -63,6 +63,11 @@
     const urlInput = document.getElementById('urlInput');
     const loader = document.getElementById('loader');
     const statusMessage = document.getElementById('statusMessage');
+
+	// Enables dark mode by default
+	document.body.style.backgroundColor = '#121212';
+    document.body.style.color = '#ffffff';
+    document.querySelector('.container').style.backgroundColor = '#333';
 
     let bulkMode = false;
     urlInput.rows = bulkMode ? 5 : 1;
